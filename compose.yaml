@@ -25,6 +25,23 @@ services:
       - "5050:80"
     depends_on:
       - postgres
+  commande-postgres:
+    image: postgres:16
+    container_name: commande-postgres
+    environment:
+      POSTGRES_DB: commande_db
+      POSTGRES_USER: commande
+      POSTGRES_PASSWORD: commande
+    ports:
+      - "5433:5432"
+    volumes:
+      - commande_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commande -d commande_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
+  commande_postgres_data:
