@@ -5,6 +5,7 @@ Ce microservice gère le catalogue des produits (CRUD), expose une API REST docu
 Images (PostgreSQL et Swagger):
 
 Capture de la table produits dans PostgreSQL.
+
 ![PostgreSQL - table produits](images/postgress_produit-db.png)
 
 Capture de l'interface Swagger affichant toutes les methodes du controleur produit.

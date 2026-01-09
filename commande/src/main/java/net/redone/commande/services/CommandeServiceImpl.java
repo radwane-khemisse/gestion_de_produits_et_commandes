@@ -45,10 +45,12 @@ public class CommandeServiceImpl implements CommandeService {
 
         for (var itemRequest : request.getItems()) {
             ProductSnapshot product = produitCatalogService.getProduct(itemRequest.getProductId(), authorization);
-            if (product.getQuantity() == null || product.getQuantity() < itemRequest.getQuantity()) {
+            int available = product.getQuantity() == null ? 0 : product.getQuantity();
+            if (available < itemRequest.getQuantity()) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
                         "Insufficient stock for product " + product.getId()
+                                + ". Available: " + available
                 );
             }
             BigDecimal price = product.getPrice();
