@@ -15,6 +15,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  commande-postgres:
+    image: postgres:16
+    container_name: commande-postgres
+    environment:
+      POSTGRES_DB: commande_db
+      POSTGRES_USER: commande
+      POSTGRES_PASSWORD: commande
+    ports:
+      - "5433:5432"
+    volumes:
+      - commande_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commande -d commande_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   pgadmin:
     image: dpage/pgadmin4:8
     container_name: produit-pgadmin
@@ -34,23 +50,78 @@ services:
     command: start-dev
     ports:
       - "8080:8080"
-  commande-postgres:
-    image: postgres:16
-    container_name: commande-postgres
+  produit-service:
+    build:
+      context: ./produit
+    container_name: produit-service
     environment:
-      POSTGRES_DB: commande_db
-      POSTGRES_USER: commande
-      POSTGRES_PASSWORD: commande
-    ports:
-      - "5433:5432"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: produit_db
+      DB_USER: produit
+      DB_PASSWORD: produit
+      PRODUIT_IMAGE_DIR: /data/catalog
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/gestion-produits_commandes
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/gestion-produits_commandes/protocol/openid-connect/certs
     volumes:
-      - commande_postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U commande -d commande_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - produit_images:/data/catalog
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+  commande-service:
+    build:
+      context: ./commande
+    container_name: commande-service
+    environment:
+      DB_HOST: commande-postgres
+      DB_PORT: 5432
+      DB_NAME: commande_db
+      DB_USER: commande
+      DB_PASSWORD: commande
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/gestion-produits_commandes
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/gestion-produits_commandes/protocol/openid-connect/certs
+    ports:
+      - "8082:8082"
+    depends_on:
+      commande-postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+  gateway-service:
+    build:
+      context: ./gateway-service
+    container_name: gateway-service
+    environment:
+      SERVICES_PRODUIT_URL: http://produit-service:8081
+      SERVICES_COMMANDE_URL: http://commande-service:8082
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/gestion-produits_commandes
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/gestion-produits_commandes/protocol/openid-connect/certs
+    ports:
+      - "8888:8888"
+    depends_on:
+      - produit-service
+      - commande-service
+      - keycloak
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8888
+        VITE_KEYCLOAK_URL: http://localhost:8080
+        VITE_KEYCLOAK_REALM: gestion-produits_commandes
+        VITE_KEYCLOAK_CLIENT_ID: frontend-app
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway-service
+      - keycloak
 
 volumes:
   postgres_data:
   commande_postgres_data:
+  produit_images:
