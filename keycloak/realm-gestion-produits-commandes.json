@@ -1,0 +1,84 @@
+{
+  "realm": "gestion-produits_commandes",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN"
+      },
+      {
+        "name": "CLIENT"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "frontend-app",
+      "name": "frontend-app",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "rootUrl": "http://localhost:3000"
+    },
+    {
+      "clientId": "gateway-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "bearerOnly": true
+    },
+    {
+      "clientId": "produit-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "bearerOnly": true
+    },
+    {
+      "clientId": "commande-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "bearerOnly": true
+    }
+  ],
+  "users": [
+    {
+      "username": "admin1",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin1@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin1",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "username": "client1",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "client1@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "client1",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CLIENT"
+      ]
+    }
+  ]
+}

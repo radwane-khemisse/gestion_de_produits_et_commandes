@@ -47,9 +47,12 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-    command: start-dev
     ports:
       - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./keycloak/realm-gestion-produits-commandes.json:/opt/keycloak/data/import/realm-gestion-produits-commandes.json:ro
+    command: start-dev --import-realm
   sonar-db:
     image: postgres:16
     container_name: sonar-postgres
@@ -114,6 +117,7 @@ services:
       DB_NAME: commande_db
       DB_USER: commande
       DB_PASSWORD: commande
+      PRODUIT_BASE_URL: http://produit-service:8081
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/gestion-produits_commandes
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/gestion-produits_commandes/protocol/openid-connect/certs
     ports:
@@ -161,3 +165,4 @@ volumes:
   sonarqube_data:
   sonarqube_logs:
   sonarqube_extensions:
+  keycloak_data:
