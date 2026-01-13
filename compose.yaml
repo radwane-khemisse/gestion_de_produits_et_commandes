@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: produit
       POSTGRES_PASSWORD: produit
     ports:
-      - "5432:5432"
+      - "56033:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,7 +23,7 @@ services:
       POSTGRES_USER: commande
       POSTGRES_PASSWORD: commande
     ports:
-      - "5433:5432"
+      - "56032:5432"
     volumes:
       - commande_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -38,7 +38,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5050:80"
+      - "56050:80"
     depends_on:
       - postgres
   keycloak:
@@ -48,7 +48,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
-      - "8080:8080"
+      - "8180:8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./keycloak/realm-gestion-produits-commandes.json:/opt/keycloak/data/import/realm-gestion-produits-commandes.json:ro
@@ -61,7 +61,7 @@ services:
       POSTGRES_USER: sonar
       POSTGRES_PASSWORD: sonar
     ports:
-      - "5434:5432"
+      - "56034:5432"
     volumes:
       - sonar_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -96,7 +96,7 @@ services:
       DB_USER: produit
       DB_PASSWORD: produit
       PRODUIT_IMAGE_DIR: /data/catalog
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/gestion-produits_commandes
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/gestion-produits_commandes
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/gestion-produits_commandes/protocol/openid-connect/certs
     volumes:
       - produit_images:/data/catalog
@@ -118,7 +118,7 @@ services:
       DB_USER: commande
       DB_PASSWORD: commande
       PRODUIT_BASE_URL: http://produit-service:8081
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/gestion-produits_commandes
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/gestion-produits_commandes
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/gestion-produits_commandes/protocol/openid-connect/certs
     ports:
       - "8082:8082"
@@ -134,10 +134,10 @@ services:
     environment:
       SERVICES_PRODUIT_URL: http://produit-service:8081
       SERVICES_COMMANDE_URL: http://commande-service:8082
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/gestion-produits_commandes
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/gestion-produits_commandes
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/gestion-produits_commandes/protocol/openid-connect/certs
     ports:
-      - "8888:8888"
+      - "18080:8888"
     depends_on:
       - produit-service
       - commande-service
@@ -146,13 +146,13 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE_URL: http://localhost:8888
-        VITE_KEYCLOAK_URL: http://localhost:8080
+        VITE_API_BASE_URL: http://localhost:18080
+        VITE_KEYCLOAK_URL: http://localhost:8180
         VITE_KEYCLOAK_REALM: gestion-produits_commandes
         VITE_KEYCLOAK_CLIENT_ID: frontend-app
     container_name: frontend
     ports:
-      - "3000:80"
+      - "13000:80"
     depends_on:
       - gateway-service
       - keycloak

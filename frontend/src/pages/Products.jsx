@@ -28,7 +28,6 @@ export default function Products() {
   const [quantities, setQuantities] = useState({})
   const [showOrder, setShowOrder] = useState(false)
   const [showForm, setShowForm] = useState(false)
-  const [imageFile, setImageFile] = useState(null)
 
   const isAdmin = hasRole('ADMIN')
 
@@ -67,24 +66,15 @@ export default function Products() {
         setError('Please fill all required fields')
         return
       }
-      if (!editingId && !imageFile) {
-        setError('Please upload a JPG image for the product')
-        return
-      }
       let savedProduct
       if (editingId) {
         savedProduct = await api.updateProduct(editingId, payload, token)
       } else {
         savedProduct = await api.createProduct(payload, token)
       }
-      const productId = savedProduct?.id || editingId
-      if (imageFile && productId) {
-        await api.uploadProductImage(productId, imageFile, token)
-      }
       setForm(emptyForm)
       setEditingId(null)
       setShowForm(false)
-      setImageFile(null)
       setSuccess(editingId ? 'Product updated successfully' : 'Product created successfully')
       loadProducts()
     } catch (err) {
@@ -101,7 +91,6 @@ export default function Products() {
       quantity: product.quantity ?? '',
     })
     setShowForm(true)
-    setImageFile(null)
     setSuccess(null)
     setError(null)
   }
@@ -110,7 +99,6 @@ export default function Products() {
     setEditingId(null)
     setForm(emptyForm)
     setShowForm(false)
-    setImageFile(null)
     setSuccess(null)
     setError(null)
   }
@@ -255,18 +243,6 @@ export default function Products() {
                       }
                       placeholder="0"
                     />
-                  </div>
-                  <div className="form-row">
-                    <label>Image (JPG)</label>
-                    <input
-                      className="input"
-                      type="file"
-                      accept="image/jpeg"
-                      onChange={(event) => setImageFile(event.target.files?.[0] || null)}
-                    />
-                    <span className="helper">
-                      Images are saved as frontend/src/assets/catalog/&lt;id&gt;.jpg
-                    </span>
                   </div>
                   <div className="actions">
                     <button className="btn" type="submit">

@@ -21,12 +21,12 @@
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": true,
       "redirectUris": [
-        "http://localhost:3000/*"
+        "http://localhost:13000/*"
       ],
       "webOrigins": [
-        "http://localhost:3000"
+        "http://localhost:13000"
       ],
-      "rootUrl": "http://localhost:3000"
+      "rootUrl": "http://localhost:13000"
     },
     {
       "clientId": "gateway-service",
